@@ -8,7 +8,7 @@ export default class BonusType1 extends Bonus {
     }
 
     applyBonus() {
-        this.scene.player.lives += 2;
+        this.scene.player.increaseLives(2);
         this.destroy();
     }
 }

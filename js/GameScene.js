@@ -11,6 +11,7 @@ import BonusType3 from './components/BonusType3.js';
 export default class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
+        this.modalElements = []; // Массив для хранения элементов модального окна
     }
 
     create() {
@@ -47,7 +48,7 @@ export default class GameScene extends Phaser.Scene {
         this.invulnerabilityEndTime = 0;
 
         // Таймер для EnemyType1
-        this.time.addEvent({
+        this.spawnEnemyType1Timer = this.time.addEvent({
             delay: 1000,
             callback: this.spawnEnemyType1,
             callbackScope: this,
@@ -55,7 +56,7 @@ export default class GameScene extends Phaser.Scene {
         });
 
         // Таймер для EnemyType2
-        this.time.addEvent({
+        this.spawnEnemyType2Timer = this.time.addEvent({
             delay: 1000,
             callback: this.spawnEnemyType2,
             callbackScope: this,
@@ -66,7 +67,7 @@ export default class GameScene extends Phaser.Scene {
         this.bonuses = this.physics.add.group();
 
         // Таймер для создания бонусов
-        this.time.addEvent({
+        this.spawnBonusTimer = this.time.addEvent({
             delay: 2000,
             callback: this.spawnBonus,
             callbackScope: this,
@@ -227,4 +228,78 @@ export default class GameScene extends Phaser.Scene {
     
         return text;
     }
+
+    pauseGameForImprovement() {
+        // this.scene.pause(); // Пауза текущей сцены
+        this.showImprovementModal(); // Отображение  улучшений
+    }
+
+    showImprovementModal() {
+        // Замораживаем игровые объекты и таймеры
+        this.physics.pause();
+        this.spawnEnemyType1Timer.paused = true;
+        this.spawnEnemyType2Timer.paused = true;
+        this.spawnBonusTimer.paused = true;
+        this.player.pauseShooting(); // Поставить стрельбу на паузу
+
+    
+        // Определение центра видимой области камеры
+        let centerX = this.cameras.main.centerX;
+        let centerY = this.cameras.main.centerY;
+    
+        // Создание полупрозрачного фона для модального окна
+        let modalBackground = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.5 } });
+        modalBackground.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
+        modalBackground.setScrollFactor(0);
+    
+        // Создание прямоугольника для модального окна
+        let modalWindowWidth = 400; // Ширина модального окна
+        let modalWindowHeight = 300; // Высота модального окна
+        let modalWindow = this.add.graphics({ fillStyle: { color: 0xffffff, alpha: 1 } });
+        modalWindow.fillRect(centerX - modalWindowWidth / 2, centerY - modalWindowHeight / 2, modalWindowWidth, modalWindowHeight);
+        modalWindow.setScrollFactor(0);
+    
+        // Добавление текста с описанием улучшений
+        let card1Text = this.add.text(centerX, centerY - modalWindowHeight / 2 + 20, 'Выберите улучшение:', { fontSize: '24px', color: '#000', align: 'center' })
+            .setOrigin(0.5, 0)
+            .setScrollFactor(0);
+    
+        // Создание кнопок или текстовых объектов для улучшений с центрированием
+        let speedText = this.add.text(centerX, centerY - 50, 'Увеличение скорости', { fontSize: '20px', color: '#000', backgroundColor: '#fff', padding: 10 })
+            .setOrigin(0.5, 0.5)
+            .setInteractive()
+            .setScrollFactor(0);
+    
+        let fireRateText = this.add.text(centerX, centerY + 50, 'Увеличение скорости стрельбы', { fontSize: '20px', color: '#000', backgroundColor: '#fff', padding: 10 })
+            .setOrigin(0.5, 0.5)
+            .setInteractive()
+            .setScrollFactor(0);
+
+        this.modalElements.push(modalBackground, modalWindow, card1Text, speedText, fireRateText);
+    
+        // Добавление обработчиков событий для выбора улучшений
+        speedText.on('pointerdown', () => {
+            this.player.increaseSpeed(10); // Пример функции увеличения скорости игрока
+            this.closeImprovementModal();
+        });
+    
+        fireRateText.on('pointerdown', () => {
+            this.player.increaseFireRate(10); // Пример функции увеличения скорости стрельбы
+            this.closeImprovementModal();
+        });
+    }
+
+    closeImprovementModal() {
+        // Удаление элементов модального окна
+        this.modalElements.forEach(element => element.destroy());
+        this.modalElements = []; // Очищаем массив
+
+        this.physics.resume();
+        this.spawnEnemyType1Timer.paused = false;
+        this.spawnEnemyType2Timer.paused = false;
+        this.spawnBonusTimer.paused = false;
+        this.player.resumeShooting(); // Возобновить стрельбу
+
+    }
+    
 }

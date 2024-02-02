@@ -15,8 +15,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('bonus1', 'assets/images/bonus1.svg');
         this.load.image('bonus2', 'assets/images/bonus2.svg');
         this.load.image('bonus3', 'assets/images/bonus3.svg');
-
-
+        this.load.image('speedIcon', 'assets/images/speedImprovementCard.png');
+        this.load.image('fireRateIcon', 'assets/images/fireRateImprovementCard.png');
 
     }
 

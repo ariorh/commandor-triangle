@@ -14,7 +14,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         // Свойства
         this.speed = 200;
         this.shootDelay = 1000;
-        this.lives = 3; // Начальное количество жизней
+        this.lives = 100; // Начальное количество жизней
         this.score = 0; // Начальный счет очков
         this.projectileCount = 1; // Начальное количество выстрелов за раз
         this.invulnerable = false // По умолчанию нет неуязвимости
@@ -58,11 +58,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
 
     // Метод для изменения скорости игрока
-    setSpeed(newSpeed) {
-        this.speed = newSpeed;
-
-        /* // Где-то можно сделать
-        player.setSpeed(200); // Устанавливает новую скорость игрока */
+    increaseSpeed(percent) {
+        this.speed = this.speed + this.speed * percent / 100;
     }
 
     shoot() {
@@ -86,15 +83,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
         });
     }
 
-    setShootDelay(newDelay) {
-        this.shootDelay = newDelay;
+    increaseFireRate(percent) {
+        this.shootDelay = this.shootDelay - this.shootDelay * percent / 100;
     
         // Обновление таймера стрельбы с новым интервалом
         this.shootTimer.remove();
         this.shootTimer = this.createShootTimer();
-
-            /* // Где-то в вашем коде, например, при сборе бонуса
-            player.setShootDelay(500); // Устанавливает время между выстрелами в 500 мс */
     }
 
     loseLife(damage) {
@@ -106,6 +100,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
     increaseScore() {
         this.score++;
+        if (this.score % 3 === 0) {
+            // Вызов метода из GameScene для паузы игры и отображения улучшений
+            this.scene.pauseGameForImprovement();
+        }
     }
 
     increaseProjectileCount() {
@@ -116,4 +114,23 @@ export default class Player extends Phaser.GameObjects.Sprite {
     resetProjectileCount() {
         this.projectileCount -= 2; // Возвращаем к исходному значению
     }
+
+    increaseLives(amount) {
+        this.lives += amount;
+    }
+
+    pauseShooting() {
+        if (this.shootTimer) {
+            this.shootTimer.paused = true; // Поставить таймер стрельбы на паузу
+        }
+    }
+    
+    resumeShooting() {
+        if (this.shootTimer) {
+            this.shootTimer.paused = false; // Возобновить таймер стрельбы
+        }
+    }
+    
 }
+
+
