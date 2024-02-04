@@ -7,6 +7,7 @@ import Bonus from './components/Bonus.js';
 import BonusType1 from './components/BonusType1.js';
 import BonusType2 from './components/BonusType2.js';
 import BonusType3 from './components/BonusType3.js';
+import ModalManager from './utils/ModalManager.js';
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -20,11 +21,11 @@ export default class GameScene extends Phaser.Scene {
             runChildUpdate: true // Это гарантирует, что метод update будет вызываться для каждого снаряда
         });
         
+        this.modalManager = new ModalManager(this); // Создаем экземпляр менеджера модальных окон
+
         this.physics.world.setBounds(0, 0, 4000, 4000);
         const floor = this.add.tileSprite(0, 0, 4000, 4000, 'floor');
         floor.setOrigin(0, 0);
-
-        
 
         // Создание игрока с использованием загруженного спрайта
         this.player = new Player(this, 2000, 2000, this.projectiles); // Передача группы снарядов в Player, надо разобраться
@@ -230,76 +231,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     pauseGameForImprovement() {
-        // this.scene.pause(); // Пауза текущей сцены
-        this.showImprovementModal(); // Отображение  улучшений
-    }
-
-    showImprovementModal() {
-        // Замораживаем игровые объекты и таймеры
-        this.physics.pause();
-        this.spawnEnemyType1Timer.paused = true;
-        this.spawnEnemyType2Timer.paused = true;
-        this.spawnBonusTimer.paused = true;
-        this.player.pauseShooting(); // Поставить стрельбу на паузу
-
-    
-        // Определение центра видимой области камеры
-        let centerX = this.cameras.main.centerX;
-        let centerY = this.cameras.main.centerY;
-    
-        // Создание полупрозрачного фона для модального окна
-        let modalBackground = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.5 } });
-        modalBackground.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height);
-        modalBackground.setScrollFactor(0);
-    
-        // Создание прямоугольника для модального окна
-        let modalWindowWidth = 400; // Ширина модального окна
-        let modalWindowHeight = 300; // Высота модального окна
-        let modalWindow = this.add.graphics({ fillStyle: { color: 0xffffff, alpha: 1 } });
-        modalWindow.fillRect(centerX - modalWindowWidth / 2, centerY - modalWindowHeight / 2, modalWindowWidth, modalWindowHeight);
-        modalWindow.setScrollFactor(0);
-    
-        // Добавление текста с описанием улучшений
-        let card1Text = this.add.text(centerX, centerY - modalWindowHeight / 2 + 20, 'Выберите улучшение:', { fontSize: '24px', color: '#000', align: 'center' })
-            .setOrigin(0.5, 0)
-            .setScrollFactor(0);
-    
-        // Создание кнопок или текстовых объектов для улучшений с центрированием
-        let speedText = this.add.text(centerX, centerY - 50, 'Увеличение скорости', { fontSize: '20px', color: '#000', backgroundColor: '#fff', padding: 10 })
-            .setOrigin(0.5, 0.5)
-            .setInteractive()
-            .setScrollFactor(0);
-    
-        let fireRateText = this.add.text(centerX, centerY + 50, 'Увеличение скорости стрельбы', { fontSize: '20px', color: '#000', backgroundColor: '#fff', padding: 10 })
-            .setOrigin(0.5, 0.5)
-            .setInteractive()
-            .setScrollFactor(0);
-
-        this.modalElements.push(modalBackground, modalWindow, card1Text, speedText, fireRateText);
-    
-        // Добавление обработчиков событий для выбора улучшений
-        speedText.on('pointerdown', () => {
-            this.player.increaseSpeed(10); // Пример функции увеличения скорости игрока
-            this.closeImprovementModal();
-        });
-    
-        fireRateText.on('pointerdown', () => {
-            this.player.increaseFireRate(10); // Пример функции увеличения скорости стрельбы
-            this.closeImprovementModal();
-        });
-    }
-
-    closeImprovementModal() {
-        // Удаление элементов модального окна
-        this.modalElements.forEach(element => element.destroy());
-        this.modalElements = []; // Очищаем массив
-
-        this.physics.resume();
-        this.spawnEnemyType1Timer.paused = false;
-        this.spawnEnemyType2Timer.paused = false;
-        this.spawnBonusTimer.paused = false;
-        this.player.resumeShooting(); // Возобновить стрельбу
-
+        this.modalManager.showModal("Choose improvment"); // Отображение  улучшений
     }
     
 }
