@@ -9,8 +9,15 @@ import GameOverScene from './GameOverScene.js';
 // Конфигурация игры
 const config = {
     type: Phaser.AUTO,
-    width: 1200, // Ширина холста
-    height: 800, // Высота холста
+    parent: 'game-container',
+    width: 800, // базовая ширина, которая будет масштабироваться
+    height: 600, // базовая высота, которая будет масштабироваться
+    scale: {
+        mode: Phaser.Scale.RESIZE, // Режим RESIZE автоматически изменяет размеры игры
+        parent: 'game-container',
+        width: '100%', // или window.innerWidth
+        height: '100%' // или window.innerHeight
+    },
     physics: {
         default: 'arcade',
         arcade: {
